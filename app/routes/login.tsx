@@ -1,24 +1,8 @@
-import type { ActionFunction, LinksFunction } from "remix";
+import { ActionFunction, Form, LinksFunction, MetaFunction } from "remix";
 import { useActionData, Link, useSearchParams } from "remix";
 import { db } from "~/utils/db.server";
 import { createUserSession, login, register } from "~/utils/session.server";
 import stylesUrl from "../styles/login.css";
-
-export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: stylesUrl }];
-};
-
-function validateUsername(username: unknown) {
-  if (typeof username !== "string" || username.length < 3) {
-    return `Usernames must be at least 3 characters long`;
-  }
-}
-
-function validatePassword(password: unknown) {
-  if (typeof password !== "string" || password.length < 6) {
-    return `Passwords must be at least 6 characters long`;
-  }
-}
 
 type ActionData = {
   formError?: string;
@@ -32,6 +16,29 @@ type ActionData = {
     password: string;
   };
 };
+
+export const links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: stylesUrl }];
+};
+
+export let meta: MetaFunction = () => {
+  return {
+    title: "Remix Jokes | Login",
+    description: "Login to submit your own jokes to Remix Jokes!",
+  };
+};
+
+function validateUsername(username: unknown) {
+  if (typeof username !== "string" || username.length < 3) {
+    return `Usernames must be at least 3 characters long`;
+  }
+}
+
+function validatePassword(password: unknown) {
+  if (typeof password !== "string" || password.length < 6) {
+    return `Passwords must be at least 6 characters long`;
+  }
+}
 
 export const action: ActionFunction = async ({
   request,
@@ -106,7 +113,7 @@ export default function Login() {
     <div className="container">
       <div className="content" data-light="">
         <h1>Login</h1>
-        <form
+        <Form
           method="post"
           aria-describedby={
             actionData?.formError ? "form-error-message" : undefined
@@ -197,7 +204,7 @@ export default function Login() {
           <button type="submit" className="button">
             Submit
           </button>
-        </form>
+        </Form>
       </div>
       <div className="links">
         <ul>

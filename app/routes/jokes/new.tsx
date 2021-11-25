@@ -1,5 +1,6 @@
 import {
   ActionFunction,
+  Form,
   Link,
   LoaderFunction,
   redirect,
@@ -74,7 +75,7 @@ export default function NewJokeRoute() {
   return (
     <div>
       <p>Add your own joke</p>
-      <form method="post">
+      <Form method="post">
         <div>
           <label>
             Name:{" "}
@@ -125,7 +126,7 @@ export default function NewJokeRoute() {
             Add
           </button>
         </div>
-      </form>
+      </Form>
     </div>
   );
 }
