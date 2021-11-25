@@ -1,14 +1,23 @@
+import type { ActionFunction, LoaderFunction } from "remix";
 import {
-  ActionFunction,
-  Form,
-  Link,
-  LoaderFunction,
-  redirect,
   useActionData,
+  redirect,
   useCatch,
+  Link,
+  Form,
+  useTransition,
 } from "remix";
-import { getUserId, requireUserId } from "~/utils/session.server";
-import { db } from "../../utils/db.server";
+import { JokeDisplay } from "~/components/joke";
+import { db } from "~/utils/db.server";
+import { requireUserId, getUserId } from "~/utils/session.server";
+
+export let loader: LoaderFunction = async ({ request }) => {
+  let userId = await getUserId(request);
+  if (!userId) {
+    throw new Response("Unauthorized", { status: 401 });
+  }
+  return {};
+};
 
 function validateJokeContent(content: string) {
   if (content.length < 10) {
@@ -17,8 +26,8 @@ function validateJokeContent(content: string) {
 }
 
 function validateJokeName(name: string) {
-  if (name.length < 3) {
-    return `That name is too short`;
+  if (name.length < 2) {
+    return `That joke's name is too short`;
   }
 }
 
@@ -34,56 +43,67 @@ type ActionData = {
   };
 };
 
-export const action: ActionFunction = async ({
+export let action: ActionFunction = async ({
   request,
 }): Promise<Response | ActionData> => {
-  const userId = await requireUserId(request);
-  const form = await request.formData();
-  const name = form.get("name");
-  const content = form.get("content");
-
+  let userId = await requireUserId(request);
+  let form = await request.formData();
+  let name = form.get("name");
+  let content = form.get("content");
   if (typeof name !== "string" || typeof content !== "string") {
-    return { formError: `Form not submitted correctly` };
+    return { formError: `Form not submitted correctly.` };
   }
 
-  const fieldErrors = {
+  let fieldErrors = {
     name: validateJokeName(name),
     content: validateJokeContent(content),
   };
-
-  const fields = { name, content };
-
+  let fields = { name, content };
   if (Object.values(fieldErrors).some(Boolean)) {
     return { fieldErrors, fields };
   }
 
-  const joke = await db.joke.create({
+  let joke = await db.joke.create({
     data: { ...fields, jokesterId: userId },
   });
   return redirect(`/jokes/${joke.id}`);
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const userId = await getUserId(request);
-  if (!userId) throw new Response("Unauthorized", { status: 401 });
-  return {};
-};
-
 export default function NewJokeRoute() {
-  const actionData = useActionData<ActionData | undefined>();
+  let actionData = useActionData<ActionData | undefined>();
+  let transition = useTransition();
+
+  if (transition.submission) {
+    let name = transition.submission.formData.get("name");
+    let content = transition.submission.formData.get("content");
+    if (
+      typeof name === "string" &&
+      typeof content === "string" &&
+      !validateJokeContent(content) &&
+      !validateJokeName(name)
+    ) {
+      return (
+        <JokeDisplay
+          joke={{ name, content }}
+          isOwner={true}
+          canDelete={false}
+        />
+      );
+    }
+  }
 
   return (
     <div>
-      <p>Add your own joke</p>
+      <p>Add your own hilarious joke</p>
       <Form method="post">
         <div>
           <label>
             Name:{" "}
             <input
               type="text"
-              name="name"
               defaultValue={actionData?.fields?.name}
-              aria-invalid={Boolean(actionData?.fieldErrors?.name || undefined)}
+              name="name"
+              aria-invalid={Boolean(actionData?.fieldErrors?.name) || undefined}
               aria-describedby={
                 actionData?.fieldErrors?.name ? "name-error" : undefined
               }
@@ -95,19 +115,18 @@ export default function NewJokeRoute() {
             </p>
           ) : null}
         </div>
-
         <div>
           <label>
-            Content:
+            Content:{" "}
             <textarea
               defaultValue={actionData?.fields?.content}
-              aria-invalid={Boolean(
-                actionData?.fieldErrors?.content || undefined,
-              )}
+              name="content"
+              aria-invalid={
+                Boolean(actionData?.fieldErrors?.content) || undefined
+              }
               aria-describedby={
                 actionData?.fieldErrors?.content ? "content-error" : undefined
               }
-              name="content"
             />
           </label>
           {actionData?.fieldErrors?.content ? (
@@ -120,7 +139,6 @@ export default function NewJokeRoute() {
             </p>
           ) : null}
         </div>
-
         <div>
           <button type="submit" className="button">
             Add
@@ -131,16 +149,8 @@ export default function NewJokeRoute() {
   );
 }
 
-export function ErrorBoundary() {
-  return (
-    <div className="error-container">
-      Something unexpected went wrong. Sorry about that.
-    </div>
-  );
-}
-
 export function CatchBoundary() {
-  const caught = useCatch();
+  let caught = useCatch();
 
   if (caught.status === 401) {
     return (
@@ -150,4 +160,14 @@ export function CatchBoundary() {
       </div>
     );
   }
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  console.error(error);
+
+  return (
+    <div className="error-container">
+      Something unexpected went wrong. Sorry about that.
+    </div>
+  );
 }
