@@ -11,3 +11,6 @@ node_modules
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+/prisma/dev.db
+.env
