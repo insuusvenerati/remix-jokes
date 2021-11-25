@@ -6,9 +6,9 @@ import { getUserId, requireUserId } from "~/utils/session.server";
 
 type LoaderData = { joke: Joke; isOwner: boolean };
 
-export const loader: LoaderFunction = async ({ request, params }) => {
-  const userId = await getUserId(request);
-  const joke = await db.joke.findUnique({
+export let loader: LoaderFunction = async ({ request, params }) => {
+  let userId = await getUserId(request);
+  let joke = await db.joke.findUnique({
     where: { id: params.jokeId },
   });
   if (!joke) {
@@ -16,35 +16,35 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       status: 404,
     });
   }
-  const data: LoaderData = {
+  let data: LoaderData = {
     joke,
     isOwner: userId === joke.jokesterId,
   };
   return data;
 };
 
-export const action: ActionFunction = async ({ request, params }) => {
-  const form = await request.formData();
-  if (form.get("_method") === "deconste") {
-    const userId = await requireUserId(request);
-    const joke = await db.joke.findUnique({
+export let action: ActionFunction = async ({ request, params }) => {
+  let form = await request.formData();
+  if (form.get("_method") === "delete") {
+    let userId = await requireUserId(request);
+    let joke = await db.joke.findUnique({
       where: { id: params.jokeId },
     });
     if (!joke) {
-      throw new Response("Can't deconste what does not exist", { status: 404 });
+      throw new Response("Can't delete what does not exist", { status: 404 });
     }
     if (joke.jokesterId !== userId) {
       throw new Response("Pssh, nice try. That's not your joke", {
         status: 401,
       });
     }
-    await db.joke.deconste({ where: { id: params.jokeId } });
+    await db.joke.delete({ where: { id: params.jokeId } });
     return redirect("/jokes");
   }
 };
 
 export default function JokeRoute() {
-  const data = useLoaderData<LoaderData>();
+  let data = useLoaderData<LoaderData>();
 
   return (
     <div>
@@ -53,9 +53,9 @@ export default function JokeRoute() {
       <Link to=".">{data.joke.name} Permalink</Link>
       {data.isOwner ? (
         <form method="post">
-          <input type="hidden" name="_method" value="deconste" />
+          <input type="hidden" name="_method" value="delete" />
           <button type="submit" className="button">
-            Deconste
+            Delete
           </button>
         </form>
       ) : null}
@@ -64,8 +64,8 @@ export default function JokeRoute() {
 }
 
 export function CatchBoundary() {
-  const caught = useCatch();
-  const params = useParams();
+  let caught = useCatch();
+  let params = useParams();
   switch (caught.status) {
     case 404: {
       return (
@@ -90,7 +90,7 @@ export function CatchBoundary() {
 export function ErrorBoundary({ error }: { error: Error }) {
   console.error(error);
 
-  const { jokeId } = useParams();
+  let { jokeId } = useParams();
   return (
     <div className="error-container">{`There was an error loading joke by the id ${jokeId}. Sorry.`}</div>
   );
