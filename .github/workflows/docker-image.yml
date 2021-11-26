@@ -19,7 +19,4 @@ jobs:
       with:
         install: true
     - name: Build the Docker image
-      env:
-        DATABASE_URL: file:./dev.db
-        SESSION_SECRET: ${{ secrets.session_secret }}
-      run: docker build . --file Dockerfile --tag remix-jokes:$(date +%s)
+      run: docker build . --file Dockerfile --tag remix-jokes:$(date +%s) --build-arg SESSION_SECRET={{ secrets.session_secret }} --build-arg DATABASE_URL=file:./dev.db
