@@ -2,6 +2,9 @@
 
 - [Remix Docs](https://remix.run/docs)
 
+[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
+[![Docker Image CI](https://github.com/insuusvenerati/remix-jokes/actions/workflows/docker-image.yml/badge.svg)](https://github.com/insuusvenerati/remix-jokes/actions/workflows/docker-image.yml)
+
 ## Development
 
 From your terminal:
