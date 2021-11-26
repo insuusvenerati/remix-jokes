@@ -6,9 +6,12 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  DOCKER_BUILDKIT: 1
+
 jobs:
 
-  build:
+  docker-build-and-push:
 
     runs-on: ubuntu-latest
 
@@ -19,4 +22,4 @@ jobs:
       with:
         install: true
     - name: Build the Docker image
-      run: docker build --build-arg SESSION_SECRET={{ secrets.session_secret }} --build-arg DATABASE_URL=file:./dev.db --file Dockerfile --tag remix-jokes:$(date +%s) .
+      run: docker build --build-arg DATABASE_URL=file:./dev.db --file Dockerfile --tag remix-jokes:$(date +%s) .
