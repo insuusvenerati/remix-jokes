@@ -9,9 +9,7 @@ on:
 jobs:
 
   build:
-    env:
-      DATABASE_URL: file:./dev.db
-      SESSION_SECRET: ${{ secrets.session_secret }}
+
     runs-on: ubuntu-latest
 
     steps:
@@ -21,4 +19,7 @@ jobs:
       with:
         install: true
     - name: Build the Docker image
+      env:
+        DATABASE_URL: file:./dev.db
+        SESSION_SECRET: ${{ secrets.session_secret }}
       run: docker build . --file Dockerfile --tag remix-jokes:$(date +%s)
