@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Build and Release
 
 on:
   push:
@@ -60,3 +60,15 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=registry,ref=ghcr.io/insuusvenerati/remix-jokes:latest
         cache-to: type=inline
+
+  semantic-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 17.x
+          yarn: true
+          yarn-version: 1.22.x
+
+      - name: Semantic Release
+        run: yarn semantic-release
