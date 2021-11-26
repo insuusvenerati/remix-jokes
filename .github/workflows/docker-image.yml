@@ -52,6 +52,9 @@ jobs:
       with:
         context: .
         push: true
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+          DATABASE_URL=file:./dev.db
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=registry,ref=insuusvenerati/remix-jokes:latest
