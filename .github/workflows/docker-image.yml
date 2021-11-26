@@ -32,7 +32,6 @@ jobs:
       with:
         # list of Docker images to use as base name for tags
         images: |
-          insuusvenerati/remix-jokes
           ghcr.io/insuusvenerati/remix-jokes
         # generate Docker tags based on the following events/attributes
         tags: |
@@ -59,5 +58,5 @@ jobs:
           DATABASE_URL=file:./dev.db
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=registry,ref=insuusvenerati/remix-jokes:latest
+        cache-from: type=registry,ref=ghcr.io/insuusvenerati/remix-jokes:latest
         cache-to: type=inline
