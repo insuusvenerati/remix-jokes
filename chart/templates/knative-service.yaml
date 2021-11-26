@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: serving.knative.dev/v1
 metadata:
-  name: knative-service-{{ include "chart.fullname" . }}
+  name: {{ include "chart.fullname" . }}
   labels:
     {{- include "chart.labels" . | nindent 4 }}
   annotations:
